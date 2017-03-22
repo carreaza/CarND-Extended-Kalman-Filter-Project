@@ -78,18 +78,23 @@ int main(int argc, char* argv[]) {
 
     // reads first element from the current line
     iss >> sensor_type;
+      cout << "sensor_type: " << sensor_type << endl;
     if (sensor_type.compare("L") == 0) {
       // LASER MEASUREMENT
 
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::LASER;
+      gt_package.sensor_type_ = GroundTruthPackage::LASER;
       meas_package.raw_measurements_ = VectorXd(2);
       float x;
       float y;
       iss >> x;
+        cout << "x: " << x << endl;
       iss >> y;
+        cout << "y: " << y << endl;
       meas_package.raw_measurements_ << x, y;
       iss >> timestamp;
+        cout << "timestamp: " << timestamp << endl;
       meas_package.timestamp_ = timestamp;
       measurement_pack_list.push_back(meas_package);
     } else if (sensor_type.compare("R") == 0) {
@@ -97,15 +102,20 @@ int main(int argc, char* argv[]) {
 
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::RADAR;
+      gt_package.sensor_type_ = GroundTruthPackage::RADAR;
       meas_package.raw_measurements_ = VectorXd(3);
       float ro;
-      float theta;
+      float phi;
       float ro_dot;
       iss >> ro;
-      iss >> theta;
+        cout << "ro: " << ro << endl;
+      iss >> phi;
+        cout << "phi: " << phi << endl;
       iss >> ro_dot;
-      meas_package.raw_measurements_ << ro, theta, ro_dot;
+        cout << "ro_dot: " << ro_dot << endl;
+      meas_package.raw_measurements_ << ro, phi, ro_dot;
       iss >> timestamp;
+        cout << "timestamp: " << timestamp << endl;
       meas_package.timestamp_ = timestamp;
       measurement_pack_list.push_back(meas_package);
     }
@@ -116,12 +126,20 @@ int main(int argc, char* argv[]) {
     float vx_gt;
     float vy_gt;
     iss >> x_gt;
+      cout << "x_gt: " << x_gt << endl;
     iss >> y_gt;
+      cout << "y_gt: " << y_gt << endl;
     iss >> vx_gt;
+      cout << "vx_gt: " << vx_gt << endl;
     iss >> vy_gt;
+      cout << "vy_gt: " << vy_gt << endl;
     gt_package.gt_values_ = VectorXd(4);
     gt_package.gt_values_ << x_gt, y_gt, vx_gt, vy_gt;
     gt_pack_list.push_back(gt_package);
+//    cout <<"x_gt: " << x_gt << endl;
+//    cout <<"y_gt: " << y_gt << endl;
+//    cout <<"vx_gt: " << vx_gt << endl;
+//    cout <<"vy_gt: " << vy_gt << endl;
   }
 
   // Create a Fusion EKF instance
@@ -162,6 +180,12 @@ int main(int argc, char* argv[]) {
     out_file_ << gt_pack_list[k].gt_values_(1) << "\t";
     out_file_ << gt_pack_list[k].gt_values_(2) << "\t";
     out_file_ << gt_pack_list[k].gt_values_(3) << "\n";
+
+      //cout << "measurement_pack_list: " << measurement_pack_list[0] << endl;
+      cout << "estimated px: " << fusionEKF.ekf_.x_(0) << " gt px: " <<  gt_pack_list[k].gt_values_(0) << endl;
+      cout << "estimated py: " << fusionEKF.ekf_.x_(1) << " gt py: " <<  gt_pack_list[k].gt_values_(1) << endl;
+      cout << "estimated vx: " << fusionEKF.ekf_.x_(2) << " gt vx: " <<  gt_pack_list[k].gt_values_(2) << endl;
+      cout << "estimated vy: " << fusionEKF.ekf_.x_(3) << " gt vy: " <<  gt_pack_list[k].gt_values_(3) << endl;
 
     estimations.push_back(fusionEKF.ekf_.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
